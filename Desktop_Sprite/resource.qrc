@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/picture">
+        <file alias="hero">Sprite.png</file>
+    </qresource>
+</RCC>
