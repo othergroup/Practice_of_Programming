@@ -9,6 +9,8 @@
 #include <QMenu>
 #include <QPoint>
 #include <QPushButton>
+#include <QLayout>
+#include <QScrollArea>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -27,11 +29,13 @@ public:
     int select = 0;
     int num_folder = 0;
     std::vector<std::vector<Item>> info;
-    std::vector<std::vector<QLabel *>> labels;
+    std::vector<std::vector<QPushButton *>> labels;
+    std::vector<QVBoxLayout *> label_menu;
     std::vector<QPushButton *> menu;
 
 private:
     Ui::MainWindow *ui;
+    //QScrollArea *m_ScrollArea;
     Folder_Dialog *folder_dialog = NULL;
     item_dialog *itemDialog = NULL;
 public slots:
