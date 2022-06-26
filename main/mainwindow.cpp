@@ -13,107 +13,42 @@
 #include <QPoint>
 #include <QPushButton>
 #include <QPicture>
-#include<QScrollArea>
-#include<QLayout>
-
+#include <QScrollArea>
+#include <QLayout>
+#define MZC "Mu Zhancun"
+/*
+    主窗口构造函数
+    Author:MZC
+*/
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)//,m_ScrollArea(new QScrollArea(parent))
+    , ui(new Ui::MainWindow)
 {
     info.resize(100);
-    label_menu.resize(100);
-    labels.resize(100);
+    item_buttons.resize(100);
     menu.resize(100);
     ui->setupUi(this);
     this->installEventFilter(this);
-    //qDebug() << this->width() << " " << this->height();
     this->resize(770, 610);
-    //ui->line->setStyleSheet("QFrame{color:rgb(20,196,188)}");
     this->setAttribute(Qt::WA_TranslucentBackground);
-    //this->setAttribute(Qt::WA_MacShowFocusRect, false);
     this->setWindowFlag(Qt::FramelessWindowHint);
-    //ui->pushButton 1-3:关闭etc
-    ui->pushButton->setAttribute(Qt::WA_Hover);
-    ui->pushButton_2->setAttribute(Qt::WA_Hover);
-    ui->pushButton_3->setAttribute(Qt::WA_Hover);
-    ui->pushButton->setStyleSheet("QPushButton{"
-                                  "background-color:rgba(237,106,94,255);"
-                                  "border:none;"
-                                  "border-radius:6px;"
-                                  "color:rgba(0,0,0,255);"
-                                  "text-align:bottom;}");
-    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
-    ui->pushButton->installEventFilter(this);
-    ui->pushButton_2->setStyleSheet("QPushButton{"
-                                    "background-color:rgba(245,191,79,255);"
-                                    "border:none;"
-                                    "border-radius:6px;"
-                                    "color:rgba(0,0,0,255);"
-                                    "text-align:center;}");
-    connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(minimize()));
-    ui->pushButton_2->installEventFilter(this);
-    ui->pushButton_3->setStyleSheet("QPushButton{"
-                                    "background-color:rgba(212,212,211,255);"
-                                    "border:none;"
-                                    "border-radius:6px;"
-                                    "color:rgba(0,0,0,255);}");
-    ui->pushButton_3->installEventFilter(this);
-
-    QAction *action = new QAction(this);
-
-    action->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/query.png"));
-    ui->lineEdit->addAction(action, QLineEdit::LeadingPosition);
-    ui->lineEdit->setAttribute(Qt::WA_Hover);
-    ui->lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    ui->lineEdit->setStyleSheet("QLineEdit{"
-                                "background-color:rgb(211,211,211);"
-                                "border:none;"
-                                "border-radius:8px;"
-                                "color:rgb(100,100,100);"
-                                "text-align:left;}"
-                                "QLineEdit::focus{"
-                                "border-style:outset;"
-                                "background-color:rgb(211,211,211);"
-                                "border:none;"
-                                "border-radius:8px;"
-                                "color:rgb(100,100,100);"
-                                "text-align:left;}");
-    ui->lineEdit->setPlaceholderText("搜索");
-    ui->lineEdit->installEventFilter(this);
-    ui->lineEdit->clearFocus();
-    this->setFocus();
-    //ui->pushButton_4:添加folder
-    //ui->pushButton_4->installEventFilter(this);
-    connect(ui->pushButton_4, SIGNAL(clicked()), this, SLOT(add_folder()));
-    //点击屏幕新建提醒事项
-    //connect(ui->pushButton_5, SIGNAL(clicked()), this, SLOT(add_item()));
-    connect(ui->pushButton_6, SIGNAL(clicked()), this, SLOT(add_item()));
-    for (int i = 0; i < menu.size(); i++) {
-        menu[i] = new QPushButton(this);
-        QString temp="/Users/Apple/Desktop/Qt/Qt/label"+QString::number((i+1)%8)+".png";
-        //menu[i]->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label1.png"));
-        menu[i]->setIcon(QIcon(temp));
-        menu[i]->setIconSize(QSize(30,30));
-        menu[i]->setStyleSheet("QPushButton{"
-                               "background-color:rgb(223, 223, 224);"
-                               "border:none;"
-                               "font: 14pt,Hiragino Sans GB;"
-                               "text-align:left;}");
-        menu[i]->setVisible(false);
-        menu[i]->installEventFilter(this);
-        label_menu[i]=new QVBoxLayout();
-        label_menu[i]->setGeometry(QRect(300,90,441,491));
-    }
-//    m_ScrollArea->setFrameShape(QFrame::NoFrame);
-//    m_ScrollArea->setGeometry(300,90,441,491);
-//    setCentralWidget()
+    this->initLineEdit();
+    this->initButton();
 }
 
+/*
+    主窗口析构函数
+    Author:MZC
+*/
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
+/*
+    绘制主窗口样式
+    Author:Mu Zhancun
+*/
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -139,6 +74,10 @@ void MainWindow::paintEvent(QPaintEvent *event)
     //QWidget::paintEvent(event);
 }
 
+/*
+    获取鼠标位置
+    Author:MZC
+*/
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     QPoint point_now = this->pos();
@@ -146,11 +85,19 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     this->dpoint = point_next - point_now;
 }
 
+/*
+    控制窗口移动
+    Author:MZC
+*/
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     this->move(event->globalPos() - this->dpoint);
 }
 
+/*
+    自定义eventFilter
+    Author:MZC
+*/
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     switch (event->type()) {
@@ -196,11 +143,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         for (int i = 0; i < num_folder; i++) {
             if (obj == menu[i]) {
                 ui->label->setText(menu[i]->text());
-                for (int j = 0; j < labels[select].size(); j++)
-                    labels[select][j]->setVisible(false);
+                for (int j = 0; j < item_buttons[select].size(); j++)
+                {
+                    item_buttons[select][j]->setVisible(false);
+                    ui->verticalLayout_2->removeWidget(item_buttons[select][j]);
+                }
                 select = i;
-                for (int j = 0; j < labels[select].size(); j++)
-                    labels[select][j]->setVisible(true);
+                for (int j = 0; j < item_buttons[select].size(); j++)
+                {
+                    item_buttons[select][j]->setVisible(true);
+                    ui->verticalLayout_2->addWidget(item_buttons[select][j]);
+                }
                 break;
             }
         }
@@ -235,43 +188,56 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QWidget::eventFilter(obj, event);
 }
 
+/*
+    最小化
+    Author:MZC
+*/
 void MainWindow::minimize()
 {
     QWidget::showMinimized();
 }
 
+/*
+    新建类别
+    Author:MZC
+*/
 void MainWindow::add_folder()
 {
-    //this->setEnabled(false);
     if (folder_dialog == NULL)
         folder_dialog = new Folder_Dialog(this);
     folder_dialog->exec();
-    //qDebug() << "NO";
-    //qDebug() << folder_dialog->name;
     if (!folder_dialog->name.isEmpty()) {
         ui->label->setText(folder_dialog->name);
         menu[num_folder]->setText(folder_dialog->name);
-
         menu[num_folder]->setVisible(true);
+        //menu[num_folder]->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
         ui->verticalLayout->insertWidget(num_folder++, menu[num_folder - 1]);
-        //qDebug()<<num_folder;
-        for (int i = 0; i < labels[select].size(); i++)
-            labels[select][i]->setVisible(false);
+        for (int i = 0; i < item_buttons[select].size(); i++)
+        {
+            item_buttons[select][i]->setVisible(false);
+            ui->verticalLayout_2->removeWidget(item_buttons[select][i]);
+        }
         select = num_folder - 1;
-        
-        this->setLayout(label_menu[select]);
     }
-    //qDebug() << "Yes";
+
 }
 
+/*
+    展示类别内提醒事项
+    Author:MZC
+*/
 void MainWindow::display_folder(QString name)
 {
     ui->label->setText(name);
-    this->setLayout(label_menu[select]);
-    for (int i = 0; i < labels[select].size(); i++)
-        labels[select][i]->setVisible(true);
+    //this->setLayout(label_menu[select]);
+    for (int i = 0; i < item_buttons[select].size(); i++)
+        item_buttons[select][i]->setVisible(true);
 }
 
+/*
+    新增提醒事项
+    Author:MZC
+*/
 void MainWindow::add_item()
 {
     if (itemDialog == NULL)
@@ -279,18 +245,98 @@ void MainWindow::add_item()
     itemDialog->exec();
     if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty()) {
         info[select].push_back(itemDialog->item);
-        QPushButton *label = new QPushButton(this);
-        label->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label_icon.png"));
-        label->setIconSize(QSize(25,25));
-        label->setText(info[select].rbegin()->name);
-        label->setVisible(true);
-        label->setStyleSheet("QPushButton{"
+        QPushButton *item_button = new QPushButton(this);
+        item_button->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label_icon.png"));
+        item_button->setIconSize(QSize(25,25));
+        item_button->setText(info[select].rbegin()->name);
+        item_button->setVisible(true);
+        //item_button->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        item_button->setStyleSheet("QPushButton{"
                              "font:16pt,Hiragino Sans GB;"
                              "background-color:rgb(255,255,255);"
                              "text-align:left;"
                              "border:none;}");
-        label_menu[select]->addWidget(label);
-        //label->setGeometry(300, 100 + 30 * labels[select].size(), 439, 21);
-        labels[select].push_back(label);
+        ui->verticalLayout_2->insertWidget(item_buttons[select].size(),item_button);
+        item_buttons[select].push_back(item_button);
+    }
+}
+
+/*
+    初始化搜索栏样式
+    Author:MZC
+*/
+void MainWindow::initLineEdit()
+{
+    QAction *action = new QAction(this);
+
+    action->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/query.png"));
+    ui->lineEdit->addAction(action, QLineEdit::LeadingPosition);
+    ui->lineEdit->setAttribute(Qt::WA_Hover);
+    ui->lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    ui->lineEdit->setStyleSheet("QLineEdit{"
+                                "background-color:rgb(211,211,211);"
+                                "border:none;"
+                                "border-radius:8px;"
+                                "color:rgb(100,100,100);"
+                                "text-align:left;}"
+                                "QLineEdit::focus{"
+                                "border-style:outset;"
+                                "background-color:rgb(211,211,211);"
+                                "border:none;"
+                                "border-radius:8px;"
+                                "color:rgb(100,100,100);"
+                                "text-align:left;}");
+    ui->lineEdit->setPlaceholderText("搜索");
+    ui->lineEdit->installEventFilter(this);
+    ui->lineEdit->clearFocus();
+    this->setFocus();
+}
+
+/*
+    初始化按钮样式
+    Author:MZC
+*/
+void MainWindow::initButton()
+{
+    ui->pushButton->setAttribute(Qt::WA_Hover);
+    ui->pushButton_2->setAttribute(Qt::WA_Hover);
+    ui->pushButton_3->setAttribute(Qt::WA_Hover);
+    ui->pushButton->setStyleSheet("QPushButton{"
+                                  "background-color:rgba(237,106,94,255);"
+                                  "border:none;"
+                                  "border-radius:6px;"
+                                  "color:rgba(0,0,0,255);"
+                                  "text-align:bottom;}");
+    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
+    ui->pushButton->installEventFilter(this);
+    ui->pushButton_2->setStyleSheet("QPushButton{"
+                                    "background-color:rgba(245,191,79,255);"
+                                    "border:none;"
+                                    "border-radius:6px;"
+                                    "color:rgba(0,0,0,255);"
+                                    "text-align:center;}");
+    connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(minimize()));
+    ui->pushButton_2->installEventFilter(this);
+    ui->pushButton_3->setStyleSheet("QPushButton{"
+                                    "background-color:rgba(212,212,211,255);"
+                                    "border:none;"
+                                    "border-radius:6px;"
+                                    "color:rgba(0,0,0,255);}");
+    ui->pushButton_3->installEventFilter(this);
+    connect(ui->pushButton_4, SIGNAL(clicked()), this, SLOT(add_folder()));
+    connect(ui->pushButton_6, SIGNAL(clicked()), this, SLOT(add_item()));
+    for (int i = 0; i < menu.size(); i++) {
+        menu[i] = new QPushButton(this);
+        QString temp="/Users/Apple/Desktop/Qt/Qt/label"+QString::number((i+1)%8)+".png";
+        //menu[i]->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label1.png"));
+        menu[i]->setIcon(QIcon(temp));
+        menu[i]->setIconSize(QSize(30,30));
+        menu[i]->setStyleSheet("QPushButton{"
+                               "background-color:rgb(223, 223, 224);"
+                               "border:none;"
+                               "font: 14pt,Hiragino Sans GB;"
+                               "text-align:left;}");
+        menu[i]->setVisible(false);
+        menu[i]->installEventFilter(this);
     }
 }
