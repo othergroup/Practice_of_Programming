@@ -12,12 +12,16 @@
 #include <QPixmap>
 #include <QPoint>
 #include <QPushButton>
+#include <QPicture>
+#include<QScrollArea>
+#include<QLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow)//,m_ScrollArea(new QScrollArea(parent))
 {
     info.resize(100);
+    label_menu.resize(100);
     labels.resize(100);
     menu.resize(100);
     ui->setupUi(this);
@@ -57,19 +61,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     QAction *action = new QAction(this);
 
-    action->setIcon(QIcon("/Users/muzhancun/Desktop/Qt/WWW/untitled/query.png"));
+    action->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/query.png"));
     ui->lineEdit->addAction(action, QLineEdit::LeadingPosition);
     ui->lineEdit->setAttribute(Qt::WA_Hover);
     ui->lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     ui->lineEdit->setStyleSheet("QLineEdit{"
-                                "background-color:rgb(220,218,218);"
+                                "background-color:rgb(211,211,211);"
                                 "border:none;"
                                 "border-radius:8px;"
                                 "color:rgb(100,100,100);"
                                 "text-align:left;}"
                                 "QLineEdit::focus{"
                                 "border-style:outset;"
-                                "background-color:rgb(220,218,218);"
+                                "background-color:rgb(211,211,211);"
                                 "border:none;"
                                 "border-radius:8px;"
                                 "color:rgb(100,100,100);"
@@ -86,9 +90,23 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButton_6, SIGNAL(clicked()), this, SLOT(add_item()));
     for (int i = 0; i < menu.size(); i++) {
         menu[i] = new QPushButton(this);
+        QString temp="/Users/Apple/Desktop/Qt/Qt/label"+QString::number((i+1)%8)+".png";
+        //menu[i]->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label1.png"));
+        menu[i]->setIcon(QIcon(temp));
+        menu[i]->setIconSize(QSize(30,30));
+        menu[i]->setStyleSheet("QPushButton{"
+                               "background-color:rgb(223, 223, 224);"
+                               "border:none;"
+                               "font: 14pt,Hiragino Sans GB;"
+                               "text-align:left;}");
         menu[i]->setVisible(false);
         menu[i]->installEventFilter(this);
+        label_menu[i]=new QVBoxLayout();
+        label_menu[i]->setGeometry(QRect(300,90,441,491));
     }
+//    m_ScrollArea->setFrameShape(QFrame::NoFrame);
+//    m_ScrollArea->setGeometry(300,90,441,491);
+//    setCentralWidget()
 }
 
 MainWindow::~MainWindow()
@@ -102,7 +120,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
     //    QPen pen;
     //    pen.setColor(QColor(238, 238, 238));
     QBrush brush;
-    brush.setColor(QColor(232, 231, 231));
+    brush.setColor(QColor(223, 223, 224));
     brush.setStyle(Qt::SolidPattern);
     QPainter painter(this);
     painter.setPen(Qt::transparent);
@@ -233,12 +251,15 @@ void MainWindow::add_folder()
     if (!folder_dialog->name.isEmpty()) {
         ui->label->setText(folder_dialog->name);
         menu[num_folder]->setText(folder_dialog->name);
+
         menu[num_folder]->setVisible(true);
         ui->verticalLayout->insertWidget(num_folder++, menu[num_folder - 1]);
+        //qDebug()<<num_folder;
         for (int i = 0; i < labels[select].size(); i++)
             labels[select][i]->setVisible(false);
-
         select = num_folder - 1;
+        
+        this->setLayout(label_menu[select]);
     }
     //qDebug() << "Yes";
 }
@@ -246,6 +267,7 @@ void MainWindow::add_folder()
 void MainWindow::display_folder(QString name)
 {
     ui->label->setText(name);
+    this->setLayout(label_menu[select]);
     for (int i = 0; i < labels[select].size(); i++)
         labels[select][i]->setVisible(true);
 }
@@ -257,15 +279,18 @@ void MainWindow::add_item()
     itemDialog->exec();
     if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty()) {
         info[select].push_back(itemDialog->item);
-        QLabel *label = new QLabel(this);
+        QPushButton *label = new QPushButton(this);
+        label->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label_icon.png"));
+        label->setIconSize(QSize(25,25));
         label->setText(info[select].rbegin()->name);
         label->setVisible(true);
-        label->setGeometry(300, 100 + 30 * labels[select].size(), 439, 21);
-        QFont font;
-        font.setPointSize(16);
-        font.setFamily("Hiragino Sans GB");
-        label->setFont(font);
+        label->setStyleSheet("QPushButton{"
+                             "font:16pt,Hiragino Sans GB;"
+                             "background-color:rgb(255,255,255);"
+                             "text-align:left;"
+                             "border:none;}");
+        label_menu[select]->addWidget(label);
+        //label->setGeometry(300, 100 + 30 * labels[select].size(), 439, 21);
         labels[select].push_back(label);
-        //ui->verticalLayout_2->insertWidget(info[select].size() - 1, label);
     }
 }
