@@ -33,6 +33,11 @@ public:
     std::vector<QVBoxLayout *> label_menu;
     std::vector<QPushButton *> menu;
 
+    bool saveFile();
+    bool loadFile();
+    bool saveFile_sql();
+    bool searchEvent_sql();
+
 private:
     Ui::MainWindow *ui;
     //QScrollArea *m_ScrollArea;
