@@ -30,6 +30,7 @@ public:
     void initLineEdit();
     void initButton();
     QPoint dpoint;
+
     int select = 0;  //所选类别
     int num_folder = 0; //类别个数
     int item_select=0;
