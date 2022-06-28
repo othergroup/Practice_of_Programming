@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 #include <folder_dialog.h>
 #include <item_dialog.h>
+#include <display_dialog.h>
 #include <vector>
 #include <QButtonGroup>
 #include <QLabel>
@@ -11,6 +12,7 @@
 #include <QPushButton>
 #include <QLayout>
 #include <QScrollArea>
+#include <QMenu>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -25,30 +27,30 @@ public:
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void initLineEdit();
+    void initButton();
     QPoint dpoint;
-    int select = 0;
-    int num_folder = 0;
-    std::vector<std::vector<Item>> info;
-    std::vector<std::vector<QPushButton *>> labels;
-    std::vector<QVBoxLayout *> label_menu;
-    std::vector<QPushButton *> menu;
 
-    bool saveFile();
-    bool loadFile();
-    bool saveFile_sql();
-    bool searchEvent_sql();
-
+    int select = 0;  //所选类别
+    int num_folder = 0; //类别个数
+    int item_select=0;
+    bool is_delete=false;   //是否删除提醒事项
+    std::vector<std::vector<Item>> info; //记录提醒事项信息
+    std::vector<std::vector<QPushButton *>> item_buttons;   //提醒事项的button列表
+    std::vector<QPushButton *> menu;    //类别的button列表
 private:
     Ui::MainWindow *ui;
-    //QScrollArea *m_ScrollArea;
-    Folder_Dialog *folder_dialog = NULL;
-    item_dialog *itemDialog = NULL;
+    Folder_Dialog *folder_dialog = nullptr;
+    item_dialog *itemDialog = nullptr;
+    display_dialog *displayDialog=nullptr;
+    void on_item_menu_requested();
 public slots:
     void minimize();
     void add_folder();
     void display_folder(QString name);
     void add_item();
-
+    void item_delete();
+    void item_show();
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 };
