@@ -15,6 +15,8 @@
 #include <QPicture>
 #include <QScrollArea>
 #include <QLayout>
+#include <QMenu>
+#include <QTimer>
 #define MZC "Mu Zhancun"
 /*
     主窗口构造函数
@@ -52,18 +54,13 @@ MainWindow::~MainWindow()
 void MainWindow::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
-    //    QPen pen;
-    //    pen.setColor(QColor(238, 238, 238));
     QBrush brush;
     brush.setColor(QColor(223, 223, 224));
     brush.setStyle(Qt::SolidPattern);
     QPainter painter(this);
     painter.setPen(Qt::transparent);
     painter.setBrush(QColor(255, 255, 255));
-    //painter.drawRect(this->rect());
-
     painter.setRenderHint(QPainter::Antialiasing); // 反锯齿;
-
     QRect rect = this->rect();
     rect.setWidth(rect.width() - 1);
     rect.setHeight(rect.height() - 1);
@@ -71,7 +68,6 @@ void MainWindow::paintEvent(QPaintEvent *event)
     painter.setBrush(brush);
     painter.drawRoundedRect(QRect(0, 0, 282, this->height() - 1), 13, 13);
     painter.drawRect(QRect(270, 0, 12, this->height() - 1));
-    //QWidget::paintEvent(event);
 }
 
 /*
@@ -140,21 +136,60 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                                             "border-radius:6px;"
                                             "color:rgb(0,0,0,255);}");
         }
-        for (int i = 0; i < num_folder; i++) {
-            if (obj == menu[i]) {
-                ui->label->setText(menu[i]->text());
-                for (int j = 0; j < item_buttons[select].size(); j++)
-                {
-                    item_buttons[select][j]->setVisible(false);
-                    ui->verticalLayout_2->removeWidget(item_buttons[select][j]);
+        QMouseEvent *qme=(QMouseEvent*)event;
+        if(qme->button()==Qt::LeftButton)
+        {
+            for (int i = 0; i < num_folder; i++) {
+                if (obj == menu[i]) {
+                    ui->label->setText(menu[i]->text());
+                    for (int j = 0; j < item_buttons[select].size(); j++)
+                    {
+                        item_buttons[select][j]->setVisible(false);
+                        ui->verticalLayout_2->removeWidget(item_buttons[select][j]);
+                    }
+                    select = i;
+                    for (int j = 0; j < item_buttons[select].size(); j++)
+                    {
+                        item_buttons[select][j]->setVisible(true);
+                        ui->verticalLayout_2->addWidget(item_buttons[select][j]);
+                    }
+                    break;
                 }
-                select = i;
-                for (int j = 0; j < item_buttons[select].size(); j++)
-                {
-                    item_buttons[select][j]->setVisible(true);
-                    ui->verticalLayout_2->addWidget(item_buttons[select][j]);
+            }
+            for(int i=0;i<item_buttons[select].size();i++){
+                if(obj==item_buttons[select][i]) {
+                    item_select=i;
+                    if(!is_delete){
+                        is_delete=true;
+                        QPalette temp_pal=item_buttons[select][i]->palette();
+                        temp_pal.setColor(QPalette::ButtonText,Qt::red);
+                        item_buttons[select][i]->setPalette(temp_pal);
+                        QTimer *timer=new QTimer(this);
+                        timer->start(2000);
+                        timer->setSingleShot(true);
+                        connect(timer,&QTimer::timeout,[=](){
+                           if(is_delete){
+                               item_delete();
+                               is_delete=false;
+                           }
+                        });
+                    } else {
+                        is_delete=false;
+                        QPalette temp_pal2=item_buttons[select][i]->palette();
+                        temp_pal2.setColor(QPalette::ButtonText,Qt::black);
+                        item_buttons[select][i]->setPalette(temp_pal2);
+                    }
                 }
-                break;
+            }
+        }
+        else if(qme->button()==Qt::RightButton)
+        {
+            for (int i = 0; i < item_buttons[select].size(); i++) {
+                if (obj == item_buttons[select][i]) {
+                    item_select=i;
+                    on_item_menu_requested();
+                    break;
+                }
             }
         }
         break;
@@ -203,7 +238,7 @@ void MainWindow::minimize()
 */
 void MainWindow::add_folder()
 {
-    if (folder_dialog == NULL)
+    if (folder_dialog == nullptr)
         folder_dialog = new Folder_Dialog(this);
     folder_dialog->exec();
     if (!folder_dialog->name.isEmpty()) {
@@ -211,11 +246,13 @@ void MainWindow::add_folder()
         menu[num_folder]->setText(folder_dialog->name);
         menu[num_folder]->setVisible(true);
         //menu[num_folder]->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        //ui->verticalLayout->addWidget(menu[num_folder]);
+        //num_folder++;
         ui->verticalLayout->insertWidget(num_folder++, menu[num_folder - 1]);
         for (int i = 0; i < item_buttons[select].size(); i++)
         {
             item_buttons[select][i]->setVisible(false);
-            ui->verticalLayout_2->removeWidget(item_buttons[select][i]);
+            ui->verticalLayout->removeWidget(item_buttons[select][i]);
         }
         select = num_folder - 1;
     }
@@ -240,7 +277,9 @@ void MainWindow::display_folder(QString name)
 */
 void MainWindow::add_item()
 {
-    if (itemDialog == NULL)
+    if(num_folder==0)
+        return;
+    if (itemDialog == nullptr)
         itemDialog = new item_dialog(this);
     itemDialog->exec();
     if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty()) {
@@ -250,12 +289,14 @@ void MainWindow::add_item()
         item_button->setIconSize(QSize(25,25));
         item_button->setText(info[select].rbegin()->name);
         item_button->setVisible(true);
-        //item_button->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        item_button->installEventFilter(this);
+        item_button->setContextMenuPolicy(Qt::CustomContextMenu);
         item_button->setStyleSheet("QPushButton{"
-                             "font:16pt,Hiragino Sans GB;"
-                             "background-color:rgb(255,255,255);"
-                             "text-align:left;"
-                             "border:none;}");
+                                   "font:17pt,Songti SC;"
+                                   "background-color:rgb(255,255,255);"
+                                   "text-align:left;"
+                                   "border:none;"
+                                   "border-bottom:1px solid rgb(230,230,230);}");
         ui->verticalLayout_2->insertWidget(item_buttons[select].size(),item_button);
         item_buttons[select].push_back(item_button);
     }
@@ -327,9 +368,8 @@ void MainWindow::initButton()
     connect(ui->pushButton_6, SIGNAL(clicked()), this, SLOT(add_item()));
     for (int i = 0; i < menu.size(); i++) {
         menu[i] = new QPushButton(this);
-        QString temp="/Users/Apple/Desktop/Qt/Qt/label"+QString::number((i+1)%8)+".png";
-        //menu[i]->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/label1.png"));
-        menu[i]->setIcon(QIcon(temp));
+        QString temps="/Users/Apple/Desktop/Qt/Qt/label"+QString::number((i+1)%8)+".png";
+        menu[i]->setIcon(QIcon(temps));
         menu[i]->setIconSize(QSize(30,30));
         menu[i]->setStyleSheet("QPushButton{"
                                "background-color:rgb(223, 223, 224);"
@@ -337,6 +377,38 @@ void MainWindow::initButton()
                                "font: 14pt,Hiragino Sans GB;"
                                "text-align:left;}");
         menu[i]->setVisible(false);
+        menu[i]->setContextMenuPolicy(Qt::CustomContextMenu);
+        //connect(menu[i],&QPushButton::customContextMenuRequested,this,&MainWindow::on_item_menu_requested);
         menu[i]->installEventFilter(this);
     }
+}
+
+void MainWindow::on_item_menu_requested()
+{
+    QMenu *item_menu=new QMenu(item_buttons[select][item_select]);
+    QAction *action1=new QAction(tr("删除"),this);
+    connect(action1,&QAction::triggered,this,&MainWindow::item_delete);
+    QAction *action2=new QAction(tr("查看信息"),this);
+    connect(action2,&QAction::triggered,this,&MainWindow::item_show);
+    item_menu->addAction(action1);
+    item_menu->addAction(action2);
+    item_menu->exec(QCursor::pos());
+}
+
+void MainWindow::item_delete()
+{
+
+    ui->verticalLayout_2->removeWidget(item_buttons[select][item_select]);
+    item_buttons[select][item_select]->deleteLater();
+    info[select].erase(info[select].begin()+item_select);
+    item_buttons[select].erase(item_buttons[select].begin()+item_select);
+}
+
+void MainWindow::item_show()
+{
+    if (displayDialog == nullptr)
+        displayDialog = new display_dialog(info[select][item_select],this);
+    displayDialog->exec();
+    info[select][item_select]=displayDialog->item;
+    item_buttons[select][item_select]->setText(displayDialog->item.name);
 }
