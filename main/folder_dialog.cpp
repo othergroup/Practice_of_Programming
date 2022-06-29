@@ -27,11 +27,6 @@ Folder_Dialog::Folder_Dialog(QWidget *parent) :
             ui->pushButton_1->setDefault(false);
         }
     });
-    //    connect(this, &Folder_Dialog::change_focus, [=]() {
-    //        ui->pushButton_1->setDefault(true);
-    //        ui->pushButton_2->setDefault(false);
-    //    });
-    //    Folder_Dialog::is_empty();
 }
 
 Folder_Dialog::~Folder_Dialog()
@@ -59,8 +54,6 @@ void Folder_Dialog::paintEvent(QPaintEvent *event)
     painter.setPen(QColor(232, 231, 231));
     //qDebug() << this->rect();
     painter.drawLine(QPointF(20, 90), QPointF(400, 90));
-    //    painter.drawRoundedRect(QRect(0, 0, 282, this->height() - 1), 13, 13);
-    //    painter.drawRect(QRect(270, 0, 12, this->height() - 1));
 }
 
 bool Folder_Dialog::eventFilter(QObject *obj, QEvent *event)
