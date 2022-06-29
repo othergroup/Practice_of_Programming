@@ -487,9 +487,10 @@ void MainWindow::item_show()
     item_buttons[select][item_select]->setText(displayDialog->item.name);
 }
 
-/* To save vector<Item> to dat.txt
+/* Name: saveFile()
  * Author: Zhao Haochen
- * Please test before display, because the author can't run the code before dealing with errors properly.
+ * Description: To save info to dat.txt, using QFile and QTextStream method.
+ * Warnings: Please test before display, because the author can't run the code before dealing with errors properly.
  */
 bool MainWindow::saveFile()
 {
@@ -515,9 +516,10 @@ bool MainWindow::saveFile()
     return 1;
 }
 
-/* To load vector<Item> from dat.txt
+/* Name: loadFile()
  * Author: Zhao Haochen
- * Please test before display, because the author can't run the code before dealing with configeration errors properly.
+ * Description: To load info from dat.txt, using QFile and QTextStream method.
+ * Warnings: Please test before display, because the author can't run the code before dealing with configeration errors properly.
  */
 bool MainWindow::loadFile()
 {
