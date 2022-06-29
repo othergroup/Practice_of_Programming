@@ -14,6 +14,7 @@
 #include <QScrollArea>
 #include <QMenu>
 #include "DesktopSprite.h"
+#include <utility>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -30,6 +31,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event) override;
     void initLineEdit();
     void initButton();
+    void init();
     QPoint dpoint;
     int select = 0;  //所选类别
     int num_folder = 0; //类别个数
@@ -40,14 +42,14 @@ public:
     std::vector<QPushButton *> menu;    //类别的button列表
     bool saveFile();
     bool loadFile();
-    bool remind();
-    Item findEvent(const QString& cat, const QString& cont);
+    std::pair<int,int> findEvent(QString cont);
 private:
     Ui::MainWindow *ui;
     Folder_Dialog *folder_dialog = nullptr;
     item_dialog *itemDialog = nullptr;
     display_dialog *displayDialog=nullptr;
     DesktopSprite *sprite=nullptr;
+    display_dialog *searchDialog=nullptr;
     void on_item_menu_requested();
 public slots:
     void minimize();
