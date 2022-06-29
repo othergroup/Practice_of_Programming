@@ -707,4 +707,7 @@ void MainWindow::folder_changename()
         displayDialog2 = new folder_name(this);
     displayDialog2->exec();
     menu[folder_select]->setText(displayDialog2->name);
+        if(folder_select==select) {
+        ui->label->setText(displayDialog2->name);
+    }
 }
