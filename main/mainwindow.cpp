@@ -17,6 +17,7 @@
 #include <QLayout>
 #include <QFile>
 #include <QTextStream>
+#include <QtSql>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) //,m_ScrollArea(new QScrollArea(parent))
