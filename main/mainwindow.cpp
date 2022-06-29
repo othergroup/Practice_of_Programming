@@ -202,10 +202,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                         timer->start(2000);
                         timer->setSingleShot(true);
                         connect(timer,&QTimer::timeout,[=](){
-                           if(is_delete){
-                               item_delete();
-                               is_delete=false;
-                           }
+                            if(is_delete){
+                                item_delete();
+                                is_delete=false;
+                            }
                         });
                     } else {
                         is_delete=false;
@@ -368,9 +368,8 @@ void MainWindow::initLineEdit()
     connect(ui->lineEdit,&QLineEdit::editingFinished,[=](){
         if(!ui->lineEdit->hasFocus())
             return;
-        int folder_find=-1,item_find=-1;
-        //folder_find,item_find=find(ui->lineEdit->text());
-        folder_find=0,item_find=0;
+        std::pair<int,int> ret=findEvent(ui->lineEdit->text());
+        int folder_find=ret.first,item_find=ret.second;
         if(folder_find==-1&&item_find==-1) {
             ui->lineEdit->clear();
             QMessageBox msgBox;
@@ -484,10 +483,9 @@ void MainWindow::item_show()
     item_buttons[select][item_select]->setText(displayDialog->item.name);
 }
 
-/* Name: saveFile()
+/* To save vector<Item> to dat.txt
  * Author: Zhao Haochen
- * Description: To save info to dat.txt, using QFile and QTextStream method.
- * Warnings: Please test before display, because the author can't run the code before dealing with errors properly.
+ * Please test before display, because the author can't run the code before dealing with errors properly.
  */
 bool MainWindow::saveFile()
 {
@@ -506,22 +504,21 @@ bool MainWindow::saveFile()
             aStream<<info[i][j].name<<" "<<info[i][j].time<<" "<<info[i][j].place<<" "<<info[i][j].other<< " "<<info[i][j].remind;
         }
     }
-//    for (auto it = info.begin(); i < num_folder; it++, i++)
-//    {
-//        aStream << " "<<info[i].size() << " "<<menu[i]->text()<<" ";
-//        for (auto it_in = it->begin(); it_in != it->end(); it_in++)
-//        {
-//            aStream << it_in->name <<" "<< it_in->time <<" "<<it_in->place << " "<<it_in->other<<" "<< it_in->remind;
-//        }
-//    }
+    //    for (auto it = info.begin(); i < num_folder; it++, i++)
+    //    {
+    //        aStream << " "<<info[i].size() << " "<<menu[i]->text()<<" ";
+    //        for (auto it_in = it->begin(); it_in != it->end(); it_in++)
+    //        {
+    //            aStream << it_in->name <<" "<< it_in->time <<" "<<it_in->place << " "<<it_in->other<<" "<< it_in->remind;
+    //        }
+    //    }
     iofile.close();
     return 1;
 }
 
-/* Name: loadFile()
- * Author: Zhao Haochen
- * Description: To load info from dat.txt, using QFile and QTextStream method.
- * Warnings: Please test before display, because the author can't run the code before dealing with configeration errors properly.
+/* To load vector<Item> from dat.txt
+ * Author: Zhao Haochen,MZC
+ * Please test before display, because the author can't run the code before dealing with configeration errors properly.
  */
 bool MainWindow::loadFile()
 {
@@ -579,6 +576,10 @@ bool MainWindow::loadFile()
     return 1;
 }
 
+/*
+    初始化界面
+    Author:MZC
+*/
 void MainWindow::init()
 {
     if(!loadFile()) {
@@ -595,4 +596,27 @@ void MainWindow::init()
         item_buttons[select][j]->setVisible(true);
         ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
     }
+}
+
+/*Name: findEvent()
+ *Author: Zhao Haochen
+ *Desciption: find the first event according to the key and content in all folders.
+ *            key value(parameter cat) should be name/time/place
+ */
+std::pair<int,int> MainWindow::findEvent(QString cont)
+{
+    std::pair<int,int> ret(-1,-1);
+    for (int i = 0; i < num_folder; i++)
+    {
+        for (int j = 0; j < info[i].size(); j++)
+        {
+            if (info[i][j].name == cont||info[i][j].time==cont||info[i][j].place==cont||info[i][j].other==cont)
+            {
+                ret.first=i,ret.second=j;
+                return ret;
+            }
+        }
+    }
+    return ret;
+    // TODO: replace it with proper code at the front.
 }
