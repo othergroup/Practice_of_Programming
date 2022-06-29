@@ -569,6 +569,64 @@ bool MainWindow::loadFile()
     return 1;
 }
 
+/*Name: findEvent()
+ *Author: Zhao Haochen
+ *Desciption: find the first event according to the key and content in all folders.
+ *            key value(parameter cat) should be name/time/place
+ */
+Item MainWindow::findEvent(const QString &cat, const QString &cont)
+{
+    Item blank;
+    if (cat == "name")
+    {
+        for (int i = 0; i < num_folder; i++)
+        {
+            for (int j = 0; j < info[i].size(); j++)
+            {
+                if (info[i][j].name == cont)
+                {
+                    return info[i][j];
+                }
+            }
+        }
+        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
+        return blank;
+    }
+    if (cat == "time")
+    {
+        for (int i = 0; i < num_folder; i++)
+        {
+            for (int j = 0; j < info[i].size(); j++)
+            {
+                if (info[i][j].time == cont)
+                {
+                    return info[i][j];
+                }
+            }
+        }
+        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
+        return blank;
+    }
+    if (cat == "place")
+    {
+        for (int i = 0; i < num_folder; i++)
+        {
+            for (int j = 0; j < info[i].size(); j++)
+            {
+                if (info[i][j].place == cont)
+                {
+                    return info[i][j];
+                }
+            }
+        }
+        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
+        return blank;
+    }
+    qDebug() << "Please type the right name of the key!";
+    return blank;
+    // TODO: replace it with proper code at the front.
+}
+
 bool MainWindow::remind()
 {
     return true;
