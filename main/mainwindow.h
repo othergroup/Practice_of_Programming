@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 #include <folder_dialog.h>
 #include <item_dialog.h>
+#include <folder_name.h>
 #include <display_dialog.h>
 #include <vector>
 #include <QButtonGroup>
@@ -36,6 +37,7 @@ public:
     int select = 0;  //所选类别
     int num_folder = 0; //类别个数
     int item_select=0;
+    int folder_select=0;
     bool is_delete=false;   //是否删除提醒事项
     std::vector<std::vector<Item>> info; //记录提醒事项信息
     std::vector<std::vector<QPushButton *>> item_buttons;   //提醒事项的button列表
@@ -50,7 +52,10 @@ private:
     display_dialog *displayDialog=nullptr;
     DesktopSprite *sprite=nullptr;
     display_dialog *searchDialog=nullptr;
+    folder_name *displayDialog2=nullptr;
+    QLabel *lab=nullptr; // 完成所有提醒事项后显示的字幕
     void on_item_menu_requested();
+    void on_folder_menu_requested();
 public slots:
     void minimize();
     void add_folder();
@@ -58,6 +63,8 @@ public slots:
     void add_item();
     void item_delete();
     void item_show();
+    void folder_delete();
+    void folder_changename();
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
 };
