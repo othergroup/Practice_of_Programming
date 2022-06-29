@@ -24,7 +24,7 @@
 #define MZC "Mu Zhancun"
 /*
     主窗口构造函数
-    Author:MZC
+    Author:MZC & Xiao Xizhi
 */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -69,6 +69,18 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
     });
+    lab=new QLabel(this);
+    lab->setText("已完成所有项目");
+    lab->setGeometry(430,220,200,200);
+    lab->setAlignment(Qt::AlignCenter);
+    QPalette label_pe;
+    QFont ft;
+    ft.setPointSize(20);
+    ft.setFamily("Songti SC");
+    label_pe.setColor(QPalette::WindowText, Qt::gray);
+    lab->setPalette(label_pe);
+    lab->setFont(ft);
+    lab->setVisible(false);
     init();
 }
 
@@ -182,6 +194,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                         ui->verticalLayout_2->removeWidget(item_buttons[select][j]);
                     }
                     select = i;
+                    if(item_buttons[select].size()==0) {
+                        lab->setVisible(true);
+                    } else {
+                        lab->setVisible(false);
+                    }
                     for (int j = 0; j < item_buttons[select].size(); j++)
                     {
                         item_buttons[select][j]->setVisible(true);
@@ -218,6 +235,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         }
         else if(qme->button()==Qt::RightButton)
         {
+            for (int i = 0; i < num_folder; i++) {
+                if (obj == menu[i]) {
+                    folder_select=i;
+                    on_folder_menu_requested();
+                    break;
+                }
+            }
             for (int i = 0; i < item_buttons[select].size(); i++) {
                 if (obj == item_buttons[select][i]) {
                     item_select=i;
@@ -289,6 +313,7 @@ void MainWindow::add_folder()
             ui->verticalLayout->removeWidget(item_buttons[select][i]);
         }
         select = num_folder - 1;
+        lab->setVisible(true);
     }
 
 }
@@ -301,6 +326,11 @@ void MainWindow::display_folder(QString name)
 {
     ui->label->setText(name);
     //this->setLayout(label_menu[select]);
+    if(item_buttons[select].size()==0) {
+        lab->setVisible(true);
+    } else {
+        lab->setVisible(false);
+    }
     for (int i = 0; i < item_buttons[select].size(); i++)
         item_buttons[select][i]->setVisible(true);
 }
@@ -317,6 +347,7 @@ void MainWindow::add_item()
         itemDialog = new item_dialog(this);
     itemDialog->exec();
     if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty()) {
+        lab->setVisible(false);
         info[select].push_back(itemDialog->item);
         //qDebug()<<itemDialog->item.time;
         QPushButton *item_button = new QPushButton(this);
@@ -463,11 +494,13 @@ void MainWindow::on_item_menu_requested()
 */
 void MainWindow::item_delete()
 {
-
     ui->verticalLayout_2->removeWidget(item_buttons[select][item_select]);
     item_buttons[select][item_select]->deleteLater();
     info[select].erase(info[select].begin()+item_select);
     item_buttons[select].erase(item_buttons[select].begin()+item_select);
+    if(item_buttons[select].size()==0) {
+        lab->setVisible(true);
+    }
 }
 
 /*
@@ -477,7 +510,7 @@ void MainWindow::item_delete()
 void MainWindow::item_show()
 {
     if (displayDialog == nullptr)
-        displayDialog = new display_dialog(info[select][item_select],this);
+        displayDialog = new display_dialog(info[select][item_select],false,this);
     displayDialog->exec();
     info[select][item_select]=displayDialog->item;
     item_buttons[select][item_select]->setText(displayDialog->item.name);
@@ -504,14 +537,6 @@ bool MainWindow::saveFile()
             aStream<<info[i][j].name<<" "<<info[i][j].time<<" "<<info[i][j].place<<" "<<info[i][j].other<< " "<<info[i][j].remind;
         }
     }
-    //    for (auto it = info.begin(); i < num_folder; it++, i++)
-    //    {
-    //        aStream << " "<<info[i].size() << " "<<menu[i]->text()<<" ";
-    //        for (auto it_in = it->begin(); it_in != it->end(); it_in++)
-    //        {
-    //            aStream << it_in->name <<" "<< it_in->time <<" "<<it_in->place << " "<<it_in->other<<" "<< it_in->remind;
-    //        }
-    //    }
     iofile.close();
     return 1;
 }
@@ -587,14 +612,19 @@ void MainWindow::init()
         return;
     }
     if(num_folder==0) {
+        lab->setVisible(false);
         return;
     }
     select=0;
     ui->label->setText(menu[select]->text());
-    for (int j = 0; j < item_buttons[select].size(); j++)
-    {
-        item_buttons[select][j]->setVisible(true);
-        ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
+    if(item_buttons[select].size()==0) {
+        lab->setVisible(true);
+    } else{
+        for (int j = 0; j < item_buttons[select].size(); j++)
+        {
+            item_buttons[select][j]->setVisible(true);
+            ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
+        }
     }
 }
 
@@ -619,4 +649,62 @@ std::pair<int,int> MainWindow::findEvent(QString cont)
     }
     return ret;
     // TODO: replace it with proper code at the front.
+}
+
+/*
+    以下和folder_name.h/cpp/ui
+    Author:Xiao xizhi
+*/
+void MainWindow::on_folder_menu_requested()
+{
+    QMenu *folder_menu=new QMenu(menu[folder_select]);
+    QAction *action1=new QAction(tr("删除"),this);
+    connect(action1,&QAction::triggered,this,&MainWindow::folder_delete);
+    QAction *action2=new QAction(tr("更改名称"),this);
+    connect(action2,&QAction::triggered,this,&MainWindow::folder_changename);
+    folder_menu->addAction(action1);
+    folder_menu->addAction(action2);
+    folder_menu->exec(QCursor::pos());
+}
+
+void MainWindow::folder_delete()
+{
+    ui->verticalLayout->removeWidget(menu[folder_select]);
+    menu[folder_select]->deleteLater();
+    for(int i=0;i<item_buttons[folder_select].size();i++) {
+        item_buttons[folder_select][i]->deleteLater();
+    }
+    item_buttons.erase(item_buttons.begin()+folder_select);
+    info.erase(info.begin()+folder_select);
+    num_folder--;
+    menu.erase(menu.begin()+folder_select);
+    if(select==folder_select) {
+        for(int i=0;i<item_buttons[select].size();i++) {
+            ui->verticalLayout_2->removeWidget(item_buttons[select][i]);
+        }
+        select=0;
+        if(num_folder==0)
+            ui->label->setText("Empty");
+        else{
+            ui->label->setText(menu[select]->text());
+            if(item_buttons[select].size()==0) {
+                lab->setVisible(true);
+            } else {
+                lab->setVisible(false);
+            }
+            for (int j = 0; j < item_buttons[select].size(); j++)
+            {
+                item_buttons[select][j]->setVisible(true);
+                ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
+            }
+        }
+    }
+}
+
+void MainWindow::folder_changename()
+{
+    if (displayDialog2 == nullptr)
+        displayDialog2 = new folder_name(this);
+    displayDialog2->exec();
+    menu[folder_select]->setText(displayDialog2->name);
 }
