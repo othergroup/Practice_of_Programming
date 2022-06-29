@@ -41,6 +41,7 @@ public:
     bool saveFile();
     bool loadFile();
     bool remind();
+    Item findEvent(const QString& cat, const QString& cont);
 private:
     Ui::MainWindow *ui;
     Folder_Dialog *folder_dialog = nullptr;
