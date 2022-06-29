@@ -18,34 +18,32 @@
 #include <QMenu>
 #include <QTimer>
 #include <QFile>
-#include <QTextStream>
-#include <QtSql>
-#include <QTextStream>
+#include<QTextStream>
 #include <QTime>
+#include <QMessageBox>
 #define MZC "Mu Zhancun"
 /*
     主窗口构造函数
     Author:MZC
 */
->>>>>>> ab546a26921e34b8fedbf2daee85b8fcecd19437
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     info.resize(100);
     item_buttons.resize(100);
     menu.resize(100);
     ui->setupUi(this);
+    //setFocusPolicy(Qt::StrongFocus);
     this->installEventFilter(this);
     this->resize(770, 610);
     this->setAttribute(Qt::WA_TranslucentBackground);
     this->setWindowFlag(Qt::FramelessWindowHint);
     this->initLineEdit();
     this->initButton();
-    QTimer *reminder = new QTimer(this);
+    QTimer *reminder=new QTimer(this);
     reminder->start(1000);
-    connect(reminder, &QTimer::timeout, [=]()
-            {
+    connect(reminder,&QTimer::timeout,[=](){
         QDateTime datetime=QDateTime::currentDateTime();
         QString str=datetime.toString("yyyy/MM/dd-hh:mm:ss");
         //qDebug()<<str;
@@ -69,7 +67,9 @@ MainWindow::MainWindow(QWidget *parent)
                     }
                 }
             }
-        } });
+        }
+    });
+    init();
 }
 
 /*
@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
 */
 MainWindow::~MainWindow()
 {
-    delete ui, folder_dialog, itemDialog, displayDialog, sprite;
+    delete ui,folder_dialog,itemDialog,displayDialog,sprite;
 }
 
 /*
@@ -130,64 +130,51 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 */
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    switch (event->type())
-    {
+    switch (event->type()) {
     case QEvent::HoverEnter:
-        if (obj == ui->pushButton || obj == ui->pushButton_2 || obj == ui->pushButton_3)
-        {
+        if (obj == ui->pushButton || obj == ui->pushButton_2 || obj == ui->pushButton_3) {
             ui->pushButton->setText(QString("×"));
             ui->pushButton_2->setText(QString("一"));
         }
         break;
     case QEvent::HoverLeave:
-        if (obj == ui->pushButton || obj == ui->pushButton_2 || obj == ui->pushButton_3)
-        {
+        if (obj == ui->pushButton || obj == ui->pushButton_2 || obj == ui->pushButton_3) {
             ui->pushButton->setText(QString(""));
             ui->pushButton_2->setText(QString(""));
         }
         break;
-    case QEvent::MouseButtonPress:
-    {
-        if (obj == ui->lineEdit)
-        {
+    case QEvent::MouseButtonPress: {
+        if (obj == ui->lineEdit) {
             ui->lineEdit->setFocus();
         }
-        if (obj != ui->lineEdit)
-        {
+        if (obj != ui->lineEdit) {
             ui->lineEdit->clearFocus();
             this->setFocus();
         }
-        if (obj == ui->pushButton)
-        {
+        if (obj == ui->pushButton) {
             ui->pushButton->setStyleSheet("QPushButton{"
                                           "background-color:rgba(181,80,72,255);"
                                           "border:none;"
                                           "border-radius:6px;"
                                           "color:rgb(0,0,0,255);}");
-        }
-        else if (obj == ui->pushButton_2)
-        {
+        } else if (obj == ui->pushButton_2) {
             ui->pushButton_2->setStyleSheet("QPushButton{"
                                             "background-color:rgba(184,143,59,255);"
                                             "border:none;"
                                             "border-radius:6px;"
                                             "color:rgb(0,0,0,255);}");
-        }
-        else if (obj == ui->pushButton_3)
-        {
+        } else if (obj == ui->pushButton_3) {
             ui->pushButton_3->setStyleSheet("QPushButton{"
                                             "background-color:rgba(212,212,211,255);"
                                             "border:none;"
                                             "border-radius:6px;"
                                             "color:rgb(0,0,0,255);}");
         }
-        QMouseEvent *qme = (QMouseEvent *)event;
-        if (qme->button() == Qt::LeftButton)
+        QMouseEvent *qme=(QMouseEvent*)event;
+        if(qme->button()==Qt::LeftButton)
         {
-            for (int i = 0; i < num_folder; i++)
-            {
-                if (obj == menu[i])
-                {
+            for (int i = 0; i < num_folder; i++) {
+                if (obj == menu[i]) {
                     ui->label->setText(menu[i]->text());
                     for (int j = 0; j < item_buttons[select].size(); j++)
                     {
@@ -198,49 +185,42 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                     for (int j = 0; j < item_buttons[select].size(); j++)
                     {
                         item_buttons[select][j]->setVisible(true);
-                        ui->verticalLayout_2->addWidget(item_buttons[select][j]);
+                        ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
                     }
                     break;
                 }
             }
-            for (int i = 0; i < item_buttons[select].size(); i++)
-            {
-                if (obj == item_buttons[select][i])
-                {
-                    item_select = i;
-                    if (!is_delete)
-                    {
-                        is_delete = true;
-                        QPalette temp_pal = item_buttons[select][i]->palette();
-                        temp_pal.setColor(QPalette::ButtonText, Qt::blue);
+            for(int i=0;i<item_buttons[select].size();i++){
+                if(obj==item_buttons[select][i]) {
+                    item_select=i;
+                    if(!is_delete){
+                        is_delete=true;
+                        QPalette temp_pal=item_buttons[select][i]->palette();
+                        temp_pal.setColor(QPalette::ButtonText,Qt::blue);
                         item_buttons[select][i]->setPalette(temp_pal);
-                        QTimer *timer = new QTimer(this);
+                        QTimer *timer=new QTimer(this);
                         timer->start(2000);
                         timer->setSingleShot(true);
-                        connect(timer, &QTimer::timeout, [=]()
-                                {
+                        connect(timer,&QTimer::timeout,[=](){
                            if(is_delete){
                                item_delete();
                                is_delete=false;
-                           } });
-                    }
-                    else
-                    {
-                        is_delete = false;
-                        QPalette temp_pal2 = item_buttons[select][i]->palette();
-                        temp_pal2.setColor(QPalette::ButtonText, Qt::black);
+                           }
+                        });
+                    } else {
+                        is_delete=false;
+                        QPalette temp_pal2=item_buttons[select][i]->palette();
+                        temp_pal2.setColor(QPalette::ButtonText,Qt::black);
                         item_buttons[select][i]->setPalette(temp_pal2);
                     }
                 }
             }
         }
-        else if (qme->button() == Qt::RightButton)
+        else if(qme->button()==Qt::RightButton)
         {
-            for (int i = 0; i < item_buttons[select].size(); i++)
-            {
-                if (obj == item_buttons[select][i])
-                {
-                    item_select = i;
+            for (int i = 0; i < item_buttons[select].size(); i++) {
+                if (obj == item_buttons[select][i]) {
+                    item_select=i;
                     on_item_menu_requested();
                     break;
                 }
@@ -249,24 +229,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         break;
     }
     case QEvent::MouseButtonRelease:
-        if (obj == ui->pushButton)
-        {
+        if (obj == ui->pushButton) {
             ui->pushButton->setStyleSheet("QPushButton{"
                                           "background-color:rgba(237,106,94,255);"
                                           "border:none;"
                                           "border-radius:6px;"
                                           "color:rgb(0,0,0,255);}");
-        }
-        else if (obj == ui->pushButton_2)
-        {
+        } else if (obj == ui->pushButton_2) {
             ui->pushButton_2->setStyleSheet("QPushButton{"
                                             "background-color:rgba(245,191,79,255);"
                                             "border:none;"
                                             "border-radius:6px;"
                                             "color:rgb(0,0,0,255);}");
-        }
-        else if (ui->pushButton == ui->pushButton_3)
-        {
+        } else if (ui->pushButton == ui->pushButton_3) {
             ui->pushButton_3->setStyleSheet("QPushButton{"
                                             "background-color:rgba(212,212,211,255);"
                                             "border:none;"
@@ -300,14 +275,13 @@ void MainWindow::add_folder()
     if (folder_dialog == nullptr)
         folder_dialog = new Folder_Dialog(this);
     folder_dialog->exec();
-    if (!folder_dialog->name.isEmpty())
-    {
+    if (!folder_dialog->name.isEmpty()) {
         ui->label->setText(folder_dialog->name);
         menu[num_folder]->setText(folder_dialog->name);
         menu[num_folder]->setVisible(true);
-        // menu[num_folder]->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-        // ui->verticalLayout->addWidget(menu[num_folder]);
-        // num_folder++;
+        //menu[num_folder]->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+        //ui->verticalLayout->addWidget(menu[num_folder]);
+        //num_folder++;
         ui->verticalLayout->insertWidget(num_folder++, menu[num_folder - 1]);
         for (int i = 0; i < item_buttons[select].size(); i++)
         {
@@ -316,6 +290,7 @@ void MainWindow::add_folder()
         }
         select = num_folder - 1;
     }
+
 }
 
 /*
@@ -325,7 +300,7 @@ void MainWindow::add_folder()
 void MainWindow::display_folder(QString name)
 {
     ui->label->setText(name);
-    // this->setLayout(label_menu[select]);
+    //this->setLayout(label_menu[select]);
     for (int i = 0; i < item_buttons[select].size(); i++)
         item_buttons[select][i]->setVisible(true);
 }
@@ -336,18 +311,17 @@ void MainWindow::display_folder(QString name)
 */
 void MainWindow::add_item()
 {
-    if (num_folder == 0)
+    if(num_folder==0)
         return;
     if (itemDialog == nullptr)
         itemDialog = new item_dialog(this);
     itemDialog->exec();
-    if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty())
-    {
+    if (!itemDialog->item.name.isEmpty() && !itemDialog->item.time.isEmpty()) {
         info[select].push_back(itemDialog->item);
-        // qDebug()<<itemDialog->item.time;
+        //qDebug()<<itemDialog->item.time;
         QPushButton *item_button = new QPushButton(this);
         item_button->setIcon(QIcon(":/img/label_icon.png"));
-        item_button->setIconSize(QSize(25, 25));
+        item_button->setIconSize(QSize(25,25));
         item_button->setText(info[select].rbegin()->name);
         item_button->setVisible(true);
         item_button->installEventFilter(this);
@@ -358,7 +332,7 @@ void MainWindow::add_item()
                                    "text-align:left;"
                                    "border:none;"
                                    "border-bottom:1px solid rgb(230,230,230);}");
-        ui->verticalLayout_2->insertWidget(item_buttons[select].size(), item_button);
+        ui->verticalLayout_2->insertWidget(item_buttons[select].size(),item_button);
         item_buttons[select].push_back(item_button);
     }
 }
@@ -370,7 +344,6 @@ void MainWindow::add_item()
 void MainWindow::initLineEdit()
 {
     QAction *action = new QAction(this);
-
     action->setIcon(QIcon("/Users/Apple/Desktop/Qt/Qt/query.png"));
     ui->lineEdit->addAction(action, QLineEdit::LeadingPosition);
     ui->lineEdit->setAttribute(Qt::WA_Hover);
@@ -392,6 +365,28 @@ void MainWindow::initLineEdit()
     ui->lineEdit->installEventFilter(this);
     ui->lineEdit->clearFocus();
     this->setFocus();
+    connect(ui->lineEdit,&QLineEdit::editingFinished,[=](){
+        if(!ui->lineEdit->hasFocus())
+            return;
+        int folder_find=-1,item_find=-1;
+        //folder_find,item_find=find(ui->lineEdit->text());
+        folder_find=0,item_find=0;
+        if(folder_find==-1&&item_find==-1) {
+            ui->lineEdit->clear();
+            QMessageBox msgBox;
+            msgBox.setText("no results found!");
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setStandardButtons(QMessageBox::Close);
+            msgBox.exec();
+        } else {
+            if (searchDialog == nullptr)
+                searchDialog = new display_dialog(info[folder_find][item_find],true,this);
+            searchDialog->exec();
+            info[folder_find][item_find]=searchDialog->item;
+            item_buttons[folder_find][item_find]->setText(searchDialog->item.name);
+
+        }
+    });
 }
 
 /*
@@ -409,7 +404,10 @@ void MainWindow::initButton()
                                   "border-radius:6px;"
                                   "color:rgba(0,0,0,255);"
                                   "text-align:bottom;}");
-    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(close()));
+    connect(ui->pushButton, &QPushButton::clicked, [=](){
+        saveFile();
+        this->close();
+    });
     ui->pushButton->installEventFilter(this);
     ui->pushButton_2->setStyleSheet("QPushButton{"
                                     "background-color:rgba(245,191,79,255);"
@@ -427,12 +425,11 @@ void MainWindow::initButton()
     ui->pushButton_3->installEventFilter(this);
     connect(ui->pushButton_4, SIGNAL(clicked()), this, SLOT(add_folder()));
     connect(ui->pushButton_6, SIGNAL(clicked()), this, SLOT(add_item()));
-    for (int i = 0; i < menu.size(); i++)
-    {
+    for (int i = 0; i < menu.size(); i++) {
         menu[i] = new QPushButton(this);
-        QString temps = ":/img/label" + QString::number((i + 1) % 8) + ".png";
+        QString temps=":/img/label"+QString::number((i+1)%8)+".png";
         menu[i]->setIcon(QIcon(temps));
-        menu[i]->setIconSize(QSize(30, 30));
+        menu[i]->setIconSize(QSize(30,30));
         menu[i]->setStyleSheet("QPushButton{"
                                "background-color:rgb(223, 223, 224);"
                                "border:none;"
@@ -440,7 +437,7 @@ void MainWindow::initButton()
                                "text-align:left;}");
         menu[i]->setVisible(false);
         menu[i]->setContextMenuPolicy(Qt::CustomContextMenu);
-        // connect(menu[i],&QPushButton::customContextMenuRequested,this,&MainWindow::on_item_menu_requested);
+        //connect(menu[i],&QPushButton::customContextMenuRequested,this,&MainWindow::on_item_menu_requested);
         menu[i]->installEventFilter(this);
     }
 }
@@ -451,11 +448,11 @@ void MainWindow::initButton()
 */
 void MainWindow::on_item_menu_requested()
 {
-    QMenu *item_menu = new QMenu(item_buttons[select][item_select]);
-    QAction *action1 = new QAction(tr("删除"), this);
-    connect(action1, &QAction::triggered, this, &MainWindow::item_delete);
-    QAction *action2 = new QAction(tr("查看信息"), this);
-    connect(action2, &QAction::triggered, this, &MainWindow::item_show);
+    QMenu *item_menu=new QMenu(item_buttons[select][item_select]);
+    QAction *action1=new QAction(tr("删除"),this);
+    connect(action1,&QAction::triggered,this,&MainWindow::item_delete);
+    QAction *action2=new QAction(tr("查看信息"),this);
+    connect(action2,&QAction::triggered,this,&MainWindow::item_show);
     item_menu->addAction(action1);
     item_menu->addAction(action2);
     item_menu->exec(QCursor::pos());
@@ -470,8 +467,8 @@ void MainWindow::item_delete()
 
     ui->verticalLayout_2->removeWidget(item_buttons[select][item_select]);
     item_buttons[select][item_select]->deleteLater();
-    info[select].erase(info[select].begin() + item_select);
-    item_buttons[select].erase(item_buttons[select].begin() + item_select);
+    info[select].erase(info[select].begin()+item_select);
+    item_buttons[select].erase(item_buttons[select].begin()+item_select);
 }
 
 /*
@@ -481,9 +478,9 @@ void MainWindow::item_delete()
 void MainWindow::item_show()
 {
     if (displayDialog == nullptr)
-        displayDialog = new display_dialog(info[select][item_select], this);
+        displayDialog = new display_dialog(info[select][item_select],this);
     displayDialog->exec();
-    info[select][item_select] = displayDialog->item;
+    info[select][item_select]=displayDialog->item;
     item_buttons[select][item_select]->setText(displayDialog->item.name);
 }
 
@@ -494,7 +491,7 @@ void MainWindow::item_show()
  */
 bool MainWindow::saveFile()
 {
-    QFile iofile("dat.txt");
+    QFile iofile("/Users/apple/Desktop/Qt/Qt/dat.txt");
     if (!iofile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qDebug() << "error ocurred!";
@@ -502,16 +499,21 @@ bool MainWindow::saveFile()
         return 0;
     }
     QTextStream aStream(&iofile);
-    int i = 0;
     aStream << num_folder;
-    for (auto it = info.begin(); i < num_folder; it++, i++)
-    {
-        aStream << info[i].size() << menu[i]->text();
-        for (auto it_in = it->begin(); it_in != it->end(); it_in++)
-        {
-            aStream << it_in->name << it_in->time << it_in->place << it_in->other << it_in->remind;
+    for(int i=0;i<num_folder;i++) {
+        aStream<<" "<<info[i].size()<<" "<<menu[i]->text()<<" ";
+        for(int j=0;j<info[i].size();j++) {
+            aStream<<info[i][j].name<<" "<<info[i][j].time<<" "<<info[i][j].place<<" "<<info[i][j].other<< " "<<info[i][j].remind;
         }
     }
+//    for (auto it = info.begin(); i < num_folder; it++, i++)
+//    {
+//        aStream << " "<<info[i].size() << " "<<menu[i]->text()<<" ";
+//        for (auto it_in = it->begin(); it_in != it->end(); it_in++)
+//        {
+//            aStream << it_in->name <<" "<< it_in->time <<" "<<it_in->place << " "<<it_in->other<<" "<< it_in->remind;
+//        }
+//    }
     iofile.close();
     return 1;
 }
@@ -523,7 +525,7 @@ bool MainWindow::saveFile()
  */
 bool MainWindow::loadFile()
 {
-    QFile iofile("dat.txt");
+    QFile iofile("/Users/apple/Desktop/Qt/Qt/dat.txt");
     if (!iofile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         qDebug() << "error occured!";
@@ -531,103 +533,66 @@ bool MainWindow::loadFile()
     }
     QTextStream aStream(&iofile);
     aStream.setAutoDetectUnicode(true);
-    aStream.readAll();
-    // ui->textEditStream->setPlainText(aStream.readAll());
-
     int i = 0;
     std::vector<Item> tmpv;
-    QString temp_name;
-    aStream >> num_folder;
+    QString temp_name,temp_num;
+    aStream >> temp_num;
+    num_folder=temp_num.toInt();
     for (; i < num_folder; ++i)
     {
         int foldersize;
         tmpv.clear();
-        Item tmp;
-        aStream >> foldersize >> menu[i]->text();
+        QString tempn;
+        aStream >> foldersize >> tempn;
+        //qDebug()<<foldersize<<" "<<tempn;
+        menu[i]->setText(tempn);
+        menu[i]->setVisible(true);
+        ui->verticalLayout->insertWidget(i, menu[i]);
+        QString tempr;
         for (int j = 0; j < foldersize; ++j)
         {
-            aStream >> tmp.name >> tmp.time >> tmp.place >> tmp.other >> tmp.remind;
+            Item tmp;
+            aStream >> tmp.name >> tmp.time >> tmp.place >> tmp.other >> tempr;
+            //qDebug()<<tmp.name<<" "<<tmp.time<<" "<<tmp.place<<" "<<tmp.other<<" "<<tempr;
+            tmp.remind=tempr.toInt();
             tmpv.push_back(tmp);
+            QPushButton *item_button = new QPushButton(this);
+            item_button->setIcon(QIcon(":/img/label_icon.png"));
+            item_button->setIconSize(QSize(25,25));
+            item_button->setText(tmp.name);
+            item_button->setVisible(false);
+            item_button->installEventFilter(this);
+            item_button->setContextMenuPolicy(Qt::CustomContextMenu);
+            item_button->setStyleSheet("QPushButton{"
+                                       "font:17pt,Songti SC;"
+                                       "background-color:rgb(255,255,255);"
+                                       "text-align:left;"
+                                       "border:none;"
+                                       "border-bottom:1px solid rgb(230,230,230);}");
+            item_buttons[i].push_back(item_button);
         }
-        info.push_back(tmpv);
+        info[i]=tmpv;
+        //qDebug()<<info[i].size();
     }
-    /*  Abandoned code
-    while (!aStream.atEnd())
-    {
-        aStream >> temp_name;
-        menu[i++]->setText(temp_name);
-        Item tmp;
-        while (aStream >> tmp.name >> tmp.time >> tmp.place >> tmp.other >> tmp.remind)
-        {
-            tmpv.push_back(tmp);
-        }
-        info.push_back(tmpv);
-        tmpv.clear();
-    }
-    */
+
     iofile.close();
     return 1;
 }
 
-/*Name: findEvent()
- *Author: Zhao Haochen
- *Desciption: find the first event according to the key and content in all folders.
- *            key value(parameter cat) should be name/time/place
- */
-Item MainWindow::findEvent(const QString &cat, const QString &cont)
+void MainWindow::init()
 {
-    Item blank;
-    if (cat == "name")
-    {
-        for (int i = 0; i < num_folder; i++)
-        {
-            for (int j = 0; j < info[i].size(); j++)
-            {
-                if (info[i][j].name == cont)
-                {
-                    return info[i][j];
-                }
-            }
-        }
-        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
-        return blank;
+    if(!loadFile()) {
+        qDebug()<<"Failed!";
+        return;
     }
-    if (cat == "time")
-    {
-        for (int i = 0; i < num_folder; i++)
-        {
-            for (int j = 0; j < info[i].size(); j++)
-            {
-                if (info[i][j].time == cont)
-                {
-                    return info[i][j];
-                }
-            }
-        }
-        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
-        return blank;
+    if(num_folder==0) {
+        return;
     }
-    if (cat == "place")
+    select=0;
+    ui->label->setText(menu[select]->text());
+    for (int j = 0; j < item_buttons[select].size(); j++)
     {
-        for (int i = 0; i < num_folder; i++)
-        {
-            for (int j = 0; j < info[i].size(); j++)
-            {
-                if (info[i][j].place == cont)
-                {
-                    return info[i][j];
-                }
-            }
-        }
-        qDebug() << "Event not found"; // TODO: replace it with proper code at the front.
-        return blank;
+        item_buttons[select][j]->setVisible(true);
+        ui->verticalLayout_2->insertWidget(j,item_buttons[select][j]);
     }
-    qDebug() << "Please type the right name of the key!";
-    return blank;
-    // TODO: replace it with proper code at the front.
-}
-
-bool MainWindow::remind()
-{
-    return true;
 }
